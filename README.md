@@ -8,3 +8,4 @@
   - summary statistics
 
 potential data source: https://datahub.io/sports-data/english-premier-league
+data dictionary: https://www.football-data.co.uk/notes.txt

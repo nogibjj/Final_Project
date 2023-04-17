@@ -6,3 +6,5 @@
 - actix microservice in Rust 
   - expected goals for teams 
   - summary statistics
+
+potential data source: https://datahub.io/sports-data/english-premier-league

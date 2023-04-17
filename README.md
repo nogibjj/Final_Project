@@ -1,6 +1,8 @@
-# rust-new-project-template
-A good starting point for a new Rust project
 
-## References
-
-* [rust-cli-template](https://github.com/kbknapp/rust-cli-template)
+- store soccer data in S3 
+- preprocess with Athena 
+- store back in S3 
+- ML model in Rust 
+- actix microservice in Rust 
+  - expected goals for teams 
+  - summary statistics

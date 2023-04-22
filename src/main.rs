@@ -4,7 +4,21 @@ use actix_web::{get, App, HttpResponse, HttpServer, Responder};
 use aws_sdk_s3::Client;
 use std::env;
 use serde_json::value::Value;
+use std::fs;
 
+//create a function that log transforms and plots
+#[get("/full_results")]
+async fn team_result_plot() -> Result<HttpResponse> {
+    const team_res: &str = "temp_data/model_res_teams.csv";
+    const team_res_png: &str = "full_res.png";
+    final_project::plot_res(team_res,team_res_png);
+
+    // run the plot function and show plot on the actix server
+    let image_data = fs::read("full_res.png")?;
+    Ok(HttpResponse::Ok()
+        .content_type("image/png")
+        .body(image_data))
+}
 
 // #[get("/team/{team_name}")]
 // async fn team() -> impl Responder {

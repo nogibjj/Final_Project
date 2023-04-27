@@ -2,7 +2,7 @@ use plotters::prelude::*;
 use polars::prelude::*;
 
 
-pub fn read_data(path:&str) -> (DataFrame) {
+pub fn read_data(path:&str) -> DataFrame {
     CsvReader::from_path(path).unwrap().finish().unwrap()
 }
 
@@ -49,9 +49,19 @@ pub fn plot(x: Vec<f64>, y: Vec<f64>, img_path:&str) {
     println!("Plot finished");
 }
 
+// convert vect option to vec
+pub fn vec_option_to_vec(vec:Vec<Option<f64>>) -> Vec<f64> {
+    let mut new_vec:Vec<f64> = Vec::new();
+    for i in 0..vec.len() {
+        new_vec.push(vec[i].unwrap());
+    }
+    new_vec
+}
+
 pub fn plot_res(path:&str, img_path:&str){
     let df = read_data(path);
-    let x = df.column("xg").unwrap().f64().unwrap().to_vec();
-    let y = df.column("label_Goal").unwrap().f64().unwrap().to_vec();
-    plot(x,y, img_path);
+    let x = vec_option_to_vec(df.column("xg").unwrap().f64().unwrap().to_vec());
+    let y = vec_option_to_vec(df.column("label_Goal").unwrap().f64().unwrap().to_vec());
+    plot(x, y, img_path);
 }
+

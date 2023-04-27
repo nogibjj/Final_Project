@@ -8,7 +8,7 @@ use std::fs;
 
 //create a function that log transforms and plots
 #[get("/full_results")]
-async fn team_result_plot() -> Result<HttpResponse> {
+async fn team_result_plot() -> Result<HttpResponse, actix_web::error::ParseError> {
     const team_res: &str = "temp_data/model_res_teams.csv";
     const team_res_png: &str = "full_res.png";
     final_project::plot_res(team_res,team_res_png);
@@ -19,6 +19,7 @@ async fn team_result_plot() -> Result<HttpResponse> {
         .content_type("image/png")
         .body(image_data))
 }
+
 
 // #[get("/team/{team_name}")]
 // async fn team() -> impl Responder {

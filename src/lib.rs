@@ -36,32 +36,32 @@ pub fn plot(x: Vec<f64>, y: Vec<f64>, img_path:&str) {
         .set_label_area_size(LabelAreaPosition::Bottom, 55)
         .set_label_area_size(LabelAreaPosition::Right, 55)
         .set_label_area_size(LabelAreaPosition::Top, 55)
-        .caption("Scatter Plot", ("sans-serif", 45))
+        .caption("Predictions", ("sans-serif", 45))
         .build_cartesian_2d(min_x..max_x, min_y..max_y)
         .unwrap();
 
     ctx.configure_mesh().draw().unwrap();
 
     // Draw Scatter Plot
-    ctx.draw_series(data.iter().map(|point| Circle::new(*point, 4, &BLUE)))
+    ctx.draw_series(data.iter().map(|point| Circle::new(*point, 4, BLUE)))
         .unwrap();
     root_area.present().unwrap();
     println!("Plot finished");
 }
 
-// convert vect option to vec
-pub fn vec_option_to_vec(vec:Vec<Option<f64>>) -> Vec<f64> {
-    let mut new_vec:Vec<f64> = Vec::new();
-    for i in 0..vec.len() {
-        new_vec.push(vec[i].unwrap());
-    }
-    new_vec
-}
-
 pub fn plot_res(path:&str, img_path:&str){
     let df = read_data(path);
-    let x = vec_option_to_vec(df.column("xg").unwrap().f64().unwrap().to_vec());
-    let y = vec_option_to_vec(df.column("label_Goal").unwrap().f64().unwrap().to_vec());
+
+    let x_vec = df.column("xg").unwrap().f64().unwrap().to_vec();
+    let mut x:Vec<f64> = Vec::new();
+    for i in 0..x_vec.len() {
+        x.push(x_vec[i].unwrap());
+    }
+
+    let y_vec = df.column("label_Goal").unwrap().i64().unwrap().to_vec();
+    let mut y:Vec<f64> = Vec::new();
+    for i in 0..y_vec.len() {
+        y.push(y_vec[i].unwrap() as f64);
+    }
     plot(x, y, img_path);
 }
-

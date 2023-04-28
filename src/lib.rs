@@ -16,7 +16,7 @@ pub async fn read_data(path:&str) -> DataFrame {
     let result = client
        .get_object()
        .bucket(AWS_S3_BUCKET)
-       .key("raw-data/tags2name.csv")
+       .key(path)
        .send()
        .await
        .expect("Failed to get object");

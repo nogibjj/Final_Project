@@ -54,11 +54,19 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     team.push_str(team_name.to_string().as_str());
     team.push('\'');
 
-    let team_df = get_queried_data(team, TEAM_RES);
+    let team_df = get_queried_data(team, TEAM_RES).await;
 
+
+    let top_5 = team_df.head(Some(5));
+    // make string from each row in the dataframe joined by a new line
+    let mut top_5_string = String::new();
+    for row in top_5.iter() {
+        top_5_string.push_str(row.to_string().as_str());
+        top_5_string.push('\n');
+    }
 
     //HttpResponse::Ok().body("Hello!")
-    HttpResponse::Ok().body(println!("{}", &team_df.await.head(Some(5))))
+    HttpResponse::Ok().body(top_5_string)
 }
 
 

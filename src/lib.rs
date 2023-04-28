@@ -113,7 +113,7 @@ async fn get_queried_bytes(query:&String, path:&str, header:FileHeaderInfo) -> V
 pub async fn get_queried_data(query:String, path:&str) -> DataFrame {
     let data_bytes = get_queried_bytes(&query, path, FileHeaderInfo::Use).await;
     let header_query: &str = "SELECT * FROM s3object s LIMIT 1";
-    let header_bytes = get_queried_bytes(&query, header_query, FileHeaderInfo::None).await;
+    let header_bytes = get_queried_bytes(&header_query, path, FileHeaderInfo::None).await;
 
     // Concat header with data 
     let final_bytes = [header_bytes, data_bytes].concat();

@@ -6,8 +6,6 @@ use std::fs;
 
 
 
-
-
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Welcome to the Premier Soccer Analyzer!")

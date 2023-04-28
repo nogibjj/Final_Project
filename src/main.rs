@@ -65,43 +65,22 @@ async fn player_result_plot() -> impl Responder {
 //     HttpResponse::Ok().body("Other test!")
 // }
 
-
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn get_queried_data(query:String, header:FileHeaderInfo) -> DataFrame{
     let aws_s3_bucket = env::var("AWS_S3_BUCKET").expect("AWS_S3_BUCKET must be set");
     let config = aws_config::from_env().region("us-east-1").load().await;
     let client = Client::new(&config);
-
-
-    // let result = client
-    //    .get_object()
-    //    .bucket(aws_s3_bucket)
-    //    .key("raw-data/tags2name.csv")
-    //    .send()
-    //    .await
-    //    .expect("Failed to get object");
-
-    // let bytes = result.body().collect().await.unwrap();
-    // let bytes = bytes.into_bytes();
-
-    // print!("{:?}", bytes);
-
-    let mut person: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
-    person.push_str("Arsenal");
-    person.push('\'');
 
     let mut output = client
         .select_object_content()
         .bucket(aws_s3_bucket)
         .key("processed-data/processed_shots.csv")
         .expression_type(ExpressionType::Sql)
-        .expression(person)
+        .expression(query)
         .input_serialization(
             InputSerialization::builder()
                 .csv(
                     CsvInput::builder()
-                        .file_header_info(FileHeaderInfo::Use)
+                        .file_header_info(header)
                         .build(),
                 )
                 .compression_type(CompressionType::None)
@@ -158,17 +137,47 @@ async fn main() -> std::io::Result<()> {
         let temp = i.as_bytes().to_vec();
         bytes.extend(temp);
     }
-    
-    // let joined = results.join("\n");
-    // let bytes = joined.as_bytes();
 
 
     let cursor = std::io::Cursor::new(bytes);
-    print!("{:?}", cursor);
+    CsvReader::new(cursor).finish().unwrap()
+}
 
-    let df = CsvReader::new(cursor).finish().unwrap();
 
-    print!("{:?}", df);
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    
+
+
+    // let result = client
+    //    .get_object()
+    //    .bucket(aws_s3_bucket)
+    //    .key("raw-data/tags2name.csv")
+    //    .send()
+    //    .await
+    //    .expect("Failed to get object");
+
+    // let bytes = result.body().collect().await.unwrap();
+    // let bytes = bytes.into_bytes();
+
+    // print!("{:?}", bytes);
+
+    // QUERIES
+    let mut person: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    person.push_str("Arsenal");
+    person.push('\'');
+
+    let header: String = "SELECT * FROM s3object s LIMIT 1".to_owned();
+
+    // GET DATA
+    let data_df = get_queried_data(person, FileHeaderInfo::Use).await;
+    let header_df = get_queried_data(header, FileHeaderInfo::None).await;
+
+    // Concat header with data 
+    let final_df = header_df.concat(&data_df).unwrap();
+
+
+    print!("{:?}", final_df);
 
 
 

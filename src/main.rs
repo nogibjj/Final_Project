@@ -65,7 +65,7 @@ async fn player_result_plot() -> impl Responder {
 //     HttpResponse::Ok().body("Other test!")
 // }
 
-async fn get_queried_data(query:String, header:FileHeaderInfo) -> Vec<u8>{
+async fn get_queried_data(query:String, path:&str, header:FileHeaderInfo) -> Vec<u8>{
     let aws_s3_bucket = env::var("AWS_S3_BUCKET").expect("AWS_S3_BUCKET must be set");
     let config = aws_config::from_env().region("us-east-1").load().await;
     let client = Client::new(&config);
@@ -73,7 +73,7 @@ async fn get_queried_data(query:String, header:FileHeaderInfo) -> Vec<u8>{
     let mut output = client
         .select_object_content()
         .bucket(aws_s3_bucket)
-        .key("processed-data/processed_shots.csv")
+        .key(path)
         .expression_type(ExpressionType::Sql)
         .expression(query)
         .input_serialization(
@@ -162,15 +162,34 @@ async fn main() -> std::io::Result<()> {
     // print!("{:?}", bytes);
 
     // QUERIES
-    let mut person: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
-    person.push_str("Arsenal");
-    person.push('\'');
+    // team name query
+    let mut team: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    team.push_str("Arsenal");
+    team.push('\'');
 
+    // header query 
     let header: String = "SELECT * FROM s3object s LIMIT 1".to_owned();
 
+    // player name query 
+    let player_name = "Lionel Messi";
+    // separate first and last name from player_name
+    let mut split = player_name.split_whitespace();
+    let first_name = split.next().unwrap();
+    let last_name = split.next().unwrap();
+
+    // player query
+    let mut player: String = "SELECT * FROM s3object s WHERE s.\"firstName\" = '".to_owned();
+    player.push_str(first_name);
+    player.push_str("' AND s.\"lastName\" = '");
+    player.push_str(last_name);
+    player.push('\'');
+
+
+
+    let test = "processed-data/processed_shots.csv";
     // GET DATA
-    let data_bytes = get_queried_data(person, FileHeaderInfo::Use).await;
-    let header_bytes = get_queried_data(header, FileHeaderInfo::None).await;
+    let data_bytes = get_queried_data(player, test, FileHeaderInfo::Use).await;
+    let header_bytes = get_queried_data(header, test, FileHeaderInfo::None).await;
 
     // Concat header with data 
     let final_bytes = [header_bytes, data_bytes].concat();

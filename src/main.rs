@@ -116,30 +116,23 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to select object content");
 
+
     // get the results of output and print them
-
     let mut results = Vec::new();
-
-    // create a byte stream that can then be added to 
 
 
     while let Ok(Some(event)) = output.payload.recv().await {
         match event {
             SelectObjectContentEventStream::Records(records) => {
-                let test = records
+                let res = records
                 .payload()
                 .map(|p| std::str::from_utf8(p.as_ref()).unwrap())
                 .unwrap_or("")
                 .to_string()
                 ;
 
-                results.push(test);
+                results.push(res);
 
-                // println!(
-                //     "Record: {}",
-                //     test
-                    
-                // );
             }
             SelectObjectContentEventStream::Stats(stats) => {
                 println!("Stats: {:?}", stats.details().unwrap());
@@ -157,15 +150,21 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    // convert results to bytes
-    let mut bytes = Vec::new();
 
-    for result in results {
-        bytes.push(result.into_bytes());
+    // convert results to bytes
+    let mut bytes = Vec::<u8>::new();
+    // convert results to bytes and store in test 
+    for i in results {
+        let temp = i.as_bytes().to_vec();
+        bytes.extend(temp);
     }
     
+    // let joined = results.join("\n");
+    // let bytes = joined.as_bytes();
+
 
     let cursor = std::io::Cursor::new(bytes);
+    print!("{:?}", cursor);
 
     let df = CsvReader::new(cursor).finish().unwrap();
 

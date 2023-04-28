@@ -174,7 +174,7 @@ async fn main() -> std::io::Result<()> {
     let header_df = get_queried_data(header, FileHeaderInfo::None).await;
 
     // Concat header with data 
-    let final_df = header_df.concat(&data_df).unwrap();
+    let final_df = header_df.vstack(&data_df).expect("unable to concat");
 
 
     print!("{:?}", final_df);

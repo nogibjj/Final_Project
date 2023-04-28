@@ -33,7 +33,7 @@ pub async fn read_data(path:&str) -> DataFrame {
 }
 
 
-async fn get_queried_bytes(query:&String, path:&str, header:FileHeaderInfo) -> Vec<u8>{
+async fn get_queried_bytes(query:String, path:&str, header:FileHeaderInfo) -> Vec<u8>{
     let aws_s3_bucket = env::var("AWS_S3_BUCKET").expect("AWS_S3_BUCKET must be set");
     let config = aws_config::from_env().region("us-east-1").load().await;
     let client = Client::new(&config);
@@ -111,9 +111,9 @@ async fn get_queried_bytes(query:&String, path:&str, header:FileHeaderInfo) -> V
 
 
 pub async fn get_queried_data(query:String, path:&str) -> DataFrame {
-    let data_bytes = get_queried_bytes(&query, path, FileHeaderInfo::Use).await;
+    let data_bytes = get_queried_bytes(query, path, FileHeaderInfo::Use).await;
     let header_query: &str = "SELECT * FROM s3object s LIMIT 1";
-    let header_bytes = get_queried_bytes(&header_query, path, FileHeaderInfo::None).await;
+    let header_bytes = get_queried_bytes(header_query.to_string(), path, FileHeaderInfo::None).await;
 
     // Concat header with data 
     let final_bytes = [header_bytes, data_bytes].concat();

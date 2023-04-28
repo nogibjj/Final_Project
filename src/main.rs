@@ -57,7 +57,8 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     let team_df = get_queried_data(team, TEAM_RES);
 
 
-    HttpResponse::Ok().body("Hello!")
+    //HttpResponse::Ok().body("Hello!")
+    HttpResponse::Ok().body(println!("{}", &team_df.await.head(Some(5))))
 }
 
 

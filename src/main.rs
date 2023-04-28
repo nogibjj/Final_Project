@@ -65,7 +65,7 @@ async fn player_result_plot() -> impl Responder {
 //     HttpResponse::Ok().body("Other test!")
 // }
 
-async fn get_queried_data(query:String, header:FileHeaderInfo) -> DataFrame{
+async fn get_queried_data(query:String, header:FileHeaderInfo) -> Vec<u8>{
     let aws_s3_bucket = env::var("AWS_S3_BUCKET").expect("AWS_S3_BUCKET must be set");
     let config = aws_config::from_env().region("us-east-1").load().await;
     let client = Client::new(&config);
@@ -139,8 +139,7 @@ async fn get_queried_data(query:String, header:FileHeaderInfo) -> DataFrame{
     }
 
 
-    let cursor = std::io::Cursor::new(bytes);
-    CsvReader::new(cursor).finish().unwrap()
+    bytes
 }
 
 
@@ -170,11 +169,14 @@ async fn main() -> std::io::Result<()> {
     let header: String = "SELECT * FROM s3object s LIMIT 1".to_owned();
 
     // GET DATA
-    let data_df = get_queried_data(person, FileHeaderInfo::Use).await;
-    let header_df = get_queried_data(header, FileHeaderInfo::None).await;
+    let data_bytes = get_queried_data(person, FileHeaderInfo::Use).await;
+    let header_bytes = get_queried_data(header, FileHeaderInfo::None).await;
 
     // Concat header with data 
-    let final_df = header_df.vstack(&data_df).expect("unable to concat");
+    let final_bytes = [header_bytes, data_bytes].concat();
+
+    let cursor = std::io::Cursor::new(final_bytes);
+    let final_df = CsvReader::new(cursor).finish().unwrap();
 
 
     print!("{:?}", final_df);

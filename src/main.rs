@@ -23,7 +23,7 @@ async fn team_result_plot() -> Result<HttpResponse, actix_web::error::ParseError
     // async fn team_result_plot() -> impl Responder {
     const TEAM_RES: &str = "processed-data/model_res_teams.csv";
     const TEAM_RES_PNG: &str = "team_res.png";
-    final_project::plot_res(TEAM_RES,TEAM_RES_PNG);
+    final_project::plot_res(TEAM_RES,TEAM_RES_PNG).await;
 
     // run the plot function and show plot on the actix server
     let image_data = fs::read(TEAM_RES_PNG)?;
@@ -40,7 +40,7 @@ async fn player_result_plot() -> Result<HttpResponse, actix_web::error::ParseErr
 // async fn player_result_plot() -> impl Responder {
     const PLAY_RES: &str = "processed-data/model_res_players.csv";
     const PLAY_RES_PNG: &str = "player_res.png";
-    final_project::plot_res(PLAY_RES,PLAY_RES_PNG);
+    final_project::plot_res(PLAY_RES,PLAY_RES_PNG).await;
 
     // run the plot function and show plot on the actix server
     let image_data = fs::read(PLAY_RES_PNG)?;

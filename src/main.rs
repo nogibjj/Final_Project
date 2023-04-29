@@ -57,16 +57,28 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     let team_df = get_queried_data(team, TEAM_RES).await;
 
 
-    let top_5 = team_df.head(Some(5));
-    // make string from each row in the dataframe joined by a new line
-    let mut top_5_string = String::new();
-    for row in top_5.iter() {
-        top_5_string.push_str(row.to_string().as_str());
-        top_5_string.push('\n');
-    }
+    // calculate stats for team 
+    // FIX
+    // add more as desired
+    let total_goals = 0;
+    let total_shots = 0;
+    let total_on_goal = 0;
+    let total_counter = 0;
+    let prop_blocked = 0;
+
+
+    // format string for each team
+    let team_string = format!(
+        "\nTeam: {team_name}
+        Total Goals: {total_goals}
+        Total Shots: {total_shots}
+        Total On-goal Shots: {total_on_goal}
+        Shots off counter attack: {total_counter}
+        Prop on-goal shots blocked: {prop_blocked}\n"
+    );
 
     //HttpResponse::Ok().body("Hello!")
-    HttpResponse::Ok().body(top_5_string)
+    HttpResponse::Ok().body(team_string)
 }
 
 

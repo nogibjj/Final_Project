@@ -50,7 +50,7 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     const TEAM_RES: &str = "processed-data/processed_shots.csv";
 
 
-    let mut team: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    let mut team: String = "SELECT sum(label_Goal) total_goals, sum(label_accurate) / count(*) prop_on_goal, sum(label_blocked) / count(*) prop_blocked, sum(label_counter_attack) total_counter FROM s3object s WHERE s.\"teamName\" = '".to_owned();
     team.push_str(team_name.to_string().as_str());
     team.push('\'');
 
@@ -60,21 +60,19 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     // calculate stats for team 
     // FIX
     // add more as desired
-    let total_goals = 0;
-    let total_shots = 0;
-    let total_on_goal = 0;
-    let total_counter = 0;
-    let prop_blocked = 0;
+    let total_goals = team_df.column("total_goals").unwrap().get(0).unwrap();
+    let prop_on_goal = team_df.column("prop_on_goal").unwrap().get(0).unwrap();
+    let total_counter = team_df.column("total_counter").unwrap().get(0).unwrap();
+    let prop_blocked = team_df.column("prop_blocked").unwrap().get(0).unwrap();
 
 
     // format string for each team
     let team_string = format!(
         "\nTeam: {team_name}
-        Total Goals: {total_goals}
-        Total Shots: {total_shots}
-        Total On-goal Shots: {total_on_goal}
-        Shots off counter attack: {total_counter}
-        Prop on-goal shots blocked: {prop_blocked}\n"
+        Total goals: {total_goals}
+        Proprtion of shots on-goal: {prop_on_goal}
+        Prop on-goal shots blocked: {prop_blocked}
+        Shots off counter attack: {total_counter}\n"
     );
 
     //HttpResponse::Ok().body("Hello!")

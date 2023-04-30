@@ -6,7 +6,6 @@
 ## Overview 
 Our final project is an European club soccer shot analysis in the form of a web microservice. The microservice contains endpoints that analyzes teams' shot efficiency both by aggregate statistics for a specific team as well as through the results of an expected goals model. 
 
-<br />
 
 ## Endpoints 
 1. `/`: Welcome page
@@ -30,8 +29,6 @@ Our final project is an European club soccer shot analysis in the form of a web 
 # ADD SCREENSHOT
 
 
-<br />
-
 ## Setup 
 
 ### Configure AWS Authentication 
@@ -45,20 +42,17 @@ Our final project is an European club soccer shot analysis in the form of a web 
 2. Create access point for bucket 
 3. Store access point alias as `AWS_S3_BUCKET` as a GitHub codespace secret (or alternatively in your local ~/.aws/credentials file)
 
-<br />
 
 ## Architecture 
 
-# ADD SCREENSHOT
+<img width="838" alt="image" src="https://user-images.githubusercontent.com/86393045/235379756-ca13cae9-ac3d-4505-ba4e-38fdc585ce97.png">
 
-<br />
 
 ## Data 
 The data used in this project is taken from an [opensource project](https://www.nature.com/articles/s41597-019-0247-7) that created soccer logs to record every spatio-temporal match event that took place during the 2017-2018 club soccer seasons in England, France, Germany, Spain, and Italy. For every league game that occurred, each individual match event (e.g., shots, fouls, passes, duels) was recorded, along with the time and location on the pitch for which it took place.
 
 The data was filtered to focus only on shots and its different attributes, as we were interested in how and to what extent club teams differ in their shooting efficiency, as after all winning a soccer match comes from shooting more goals. 
 
-<br />
 
 ## Model 
 ### Expected Goals Model Description 
@@ -73,7 +67,6 @@ Since we expect non-linear interactions between the variables, we use a random f
 
 We split the data into a training and a test set based on a stratified sample. We stratify because no-goals are much more prevalent in the data. To set the hyperparameters we use stratified k-fold cross validation and a grid search
 
-<br />
 
 ## Benchmarking 
 

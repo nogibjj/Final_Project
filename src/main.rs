@@ -50,7 +50,9 @@ async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
     const TEAM_RES: &str = "processed-data/processed_shots.csv";
 
 
-    let mut team: String = "SELECT sum(label_Goal) total_goals, sum(label_accurate) / count(*) prop_on_goal, sum(label_blocked) / count(*) prop_blocked, sum(label_counter_attack) total_counter FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    let mut team: String = "SELECT sum(s.label_Goal) AS total_goals, sum(s.label_accurate) / count(*) AS prop_on_goal, sum(s.label_blocked) / count(*) AS prop_blocked, sum(s.label_counter_attack) AS total_counter FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    // let mut team: String = "SELECT sum(s.label_Goal) FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+
     team.push_str(team_name.to_string().as_str());
     team.push('\'');
 

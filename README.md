@@ -10,23 +10,26 @@ Our final project is an European club soccer shot analysis in the form of a web 
 ## Endpoints 
 1. `/`: Welcome page
 
-# ADD SCREENSHOT
+![Index](Index.png)
 
 2. `/team_results`: Displays the results of the expected goals model on a team level 
-
-# ADD DETAILS?
-# ADD SCREENSHOT
+    
+The x-axis shows the model prediction for each team and the y-axis is the true value.
+   
+![TeamResults](TeamResults.png)
 
 3. `/player_results`: Displays the results of the expected goals model on a player level 
-
-# ADD DETAILS?
-# ADD SCREENSHOT
+    
+The x-axis shows the model prediction for each player and the y-axis is the true value.
+   
+![PlayerResults](PlayerResults.png)
 
 
 4. `/team/{team_name}`: Display summary shot statistics for a specified team name
-
-# ADD DETAILS?
-# ADD SCREENSHOT
+    
+For each team, this page shows the number of total goals for the team, how many shots they attempted, how many of those shots were on goal, how many of those shots came during a counter attack, and how many shots were blocked.
+   
+![Arsenal](Arsenal.png)
 
 
 ## Setup 
@@ -69,5 +72,8 @@ We split the data into a training and a test set based on a stratified sample. W
 
 
 ## Benchmarking 
-
-# ADD SCREENSHOT
+![TeamTime](TeamTime.png)
+     
+![PlayerTime](PlayerTime.png)
+     
+![ArsenalTime](ArsenalTime.png)

@@ -1,4 +1,4 @@
-use actix_web::{HttpResponse, HttpRequest, Responder};
+use actix_web::{HttpRequest, HttpResponse, Responder};
 
 pub struct Index;
 impl actix_web::dev::HttpServiceFactory for Index {

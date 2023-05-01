@@ -1,9 +1,7 @@
 extern crate actix_web;
-use actix_web::{get, App, HttpResponse, HttpServer, Responder};
-// use aws_sdk_s3::types::ByteStream;
-//use aws_sdk_s3::Client;
-//use std::env;
-//use serde_json::value::Value;
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use final_project::get_queried_data;
+
 use std::fs;
 
 #[get("/")]
@@ -14,12 +12,15 @@ async fn hello() -> impl Responder {
 //function that plots the team results
 #[get("/team_results")]
 async fn team_result_plot() -> Result<HttpResponse, actix_web::error::ParseError> {
-    const TEAM_RES: &str = "temp_data/model_res_teams.csv";
+    //let start = std::time::Instant::now();
+    const TEAM_RES: &str = "processed-data/model_res_teams.csv";
     const TEAM_RES_PNG: &str = "team_res.png";
-    final_project::plot_res(TEAM_RES,TEAM_RES_PNG);
+    final_project::plot_res(TEAM_RES, TEAM_RES_PNG).await;
 
     // run the plot function and show plot on the actix server
     let image_data = fs::read(TEAM_RES_PNG)?;
+    //let end = std::time::Instant::now();
+    //println!("Time to create team plot: {:?}", end.duration_since(start));
     Ok(HttpResponse::Ok()
         .content_type("image/png")
         .body(image_data))
@@ -28,79 +29,82 @@ async fn team_result_plot() -> Result<HttpResponse, actix_web::error::ParseError
 //function that plots the player results
 #[get("/player_results")]
 async fn player_result_plot() -> Result<HttpResponse, actix_web::error::ParseError> {
-    const PLAY_RES: &str = "temp_data/model_res_players.csv";
+    //let start = std::time::Instant::now();
+    const PLAY_RES: &str = "processed-data/model_res_players.csv";
     const PLAY_RES_PNG: &str = "player_res.png";
-    final_project::plot_res(PLAY_RES,PLAY_RES_PNG);
+    final_project::plot_res(PLAY_RES, PLAY_RES_PNG).await;
 
     // run the plot function and show plot on the actix server
     let image_data = fs::read(PLAY_RES_PNG)?;
+    //let end = std::time::Instant::now();
+    //println!("Time to create player plot: {:?}", end.duration_since(start));
     Ok(HttpResponse::Ok()
         .content_type("image/png")
         .body(image_data))
 }
 
+#[get("/team/{team_name}")]
+async fn team_specific_data(team_name: web::Path<String>) -> impl Responder {
+    //let start = std::time::Instant::now();
+    const TEAM_RES: &str = "processed-data/processed_shots.csv";
 
-// #[get("/team/{team_name}")]
-// async fn team() -> impl Responder {
-//     HttpResponse::Ok().body("Hello!")
-// }
+    let mut team: String = "SELECT * FROM s3object s WHERE s.\"teamName\" = '".to_owned();
+    team.push_str(team_name.to_string().as_str());
+    team.push('\'');
 
-// #[get("/player/{player_name}")]
-// async fn player() -> impl Responder {
-//     HttpResponse::Ok().body("Other test!")
-// }
+    let team_df = get_queried_data(team, TEAM_RES).await;
 
+    let total_goals = team_df
+        .column("label_Goal")
+        .expect("REASON")
+        .sum::<f64>()
+        .unwrap();
 
-// #[actix_web::main]
-// async fn main() -> std::io::Result<()> {
-//     //add a print message to the console that the service is running
-//     println!("Starting service...");
-//     HttpServer::new(|| App::new().service(team).service(player))
-//         .bind("0.0.0.0:8080")?
-//         .run()
-//         .await
-// }
+    let total_shots = team_df.height();
 
+    let total_on_goal = team_df
+        .column("label_accurate")
+        .expect("REASON")
+        .sum::<f64>()
+        .unwrap();
+
+    let total_blocked = team_df
+        .column("label_blocked")
+        .expect("REASON")
+        .sum::<f64>()
+        .unwrap();
+
+    let total_counter = team_df
+        .column("label_counter_attack")
+        .expect("REASON")
+        .sum::<f64>()
+        .unwrap();
+
+    // format string for each team
+    let team_string = format!(
+        "\nTeam: {team_name}
+        Total Goals: {total_goals}
+        Total Shots: {total_shots}
+        Total On-goal Shots: {total_on_goal}
+        Shots off counter attack: {total_counter}
+        On-goal shots blocked: {total_blocked}"
+    );
+    //let end = std::time::Instant::now();
+    //println!("Time to create team page: {:?}", end.duration_since(start));
+
+    HttpResponse::Ok().body(team_string)
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    //let AWS_S3_BUCKET = env::var("AWS_S3_BUCKET").expect("AWS_S3_BUCKET must be set");
-    // let AWS_ACCESS_KEY_ID = env::var("AWS_ACCESS_KEY_ID")
-    // let AWS_SECRET_ACCESS_KEY = env::var("AWS_SECRET_ACCESS_KEY")
-    // let config = aws_config::load_from_env().await;
-    //let config = aws_config::from_env().region("us-east-1").load().await;
-    //let client = Client::new(&config);
-
-
-
-    //let result = client
-    //    .get_object()
-    //    .bucket(AWS_S3_BUCKET)
-    //    .key("raw-data/tags2name.csv")
-    //    .send()
-    //    .await
-    //    .expect("Failed to get object");
-
-    // let bytes = result.body.collect().await?.into_bytes();
-    // let thing: Thing = serde_json::from_slice(&bytes).unwrap();
-
-    //let res = result
-     //   .unwrap()
-     //   .json::<HashMap<String, Value>>()
-     //   .await;
-
-    //print!("{:?}", res.body)
-
     HttpServer::new(|| {
         App::new()
             .service(hello)
             .service(team_result_plot)
             .service(player_result_plot)
+            .service(team_specific_data)
     })
     .bind("0.0.0.0:8080")?
     .run()
     .await
-
 }
-
-
